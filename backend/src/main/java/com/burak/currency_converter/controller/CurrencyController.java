@@ -1,6 +1,6 @@
-package com.burak.currencyconverter.controller;
+package com.burak.currency_converter.controller;
 
-import com.burak.currencyconverter.service.CurrencyService;
+import com.burak.currency_converter.service.CurrencyService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
