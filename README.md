@@ -24,11 +24,4 @@ Bu proje; dış API entegrasyonu, performans optimizasyonu (Spring Cache) ve mod
 * **Tailwind CSS** (Modern koyu tema ve Glassmorphism tasarımı)
 
 ---
-
-## 📂 Proje Mimarisi (Monorepo)
-
-```text
-currency-converter/
-├── backend/         # Spring Boot REST API ve Servis Katmanı
-└── web/             # React + Vite + Tailwind CSS Arayüzü
 <img width="1915" height="1040" alt="Ekran Resmi 2026-10-02 02 41 58" src="https://github.com/user-attachments/assets/7efbfc42-8dd3-4411-a294-96b982ef2f87" />
