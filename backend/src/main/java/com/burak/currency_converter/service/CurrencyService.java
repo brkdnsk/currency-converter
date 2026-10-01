@@ -1,4 +1,4 @@
-package com.burak.currencyconverter.service;
+package com.burak.currency_converter.service;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -9,15 +9,21 @@ import java.util.Map;
 @Service
 public class CurrencyService {
 
-    // Frankfurter API adresi (Örn: Baz para birimine göre güncel kurlar)
-    private final String API_URL = "https://api.frankfurter.app/latest?from=";
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    @Cacheable("exchangeRates") //  Kurları bellekte tutar, her istekte tekrar dış API'ye gitmez
+    // 1. Tüm kurları listelemek için (Eski fonksiyonumuz)
+    @Cacheable("exchangeRates")
     public Map<String, Object> getRates(String baseCurrency) {
-        RestTemplate restTemplate = new RestTemplate();
-        String url = API_URL + baseCurrency.toUpperCase();
+        String url = "https://api.frankfurter.app/latest?from=" + baseCurrency.toUpperCase();
+        return restTemplate.getForObject(url, Map.class);
+    }
 
-        // Dış API'den gelen JSON yanıtını Map olarak döndürür
+    // 2. İki para birimi arasında doğrudan dönüşüm yapmak için yeni fonksiyon
+    public Map<String, Object> convertCurrency(String from, String to, double amount) {
+        // Frankfurter API'nin desteklediği akıllı URL yapısı
+        String url = String.format("https://api.frankfurter.app/latest?amount=%.2f&from=%s&to=%s",
+                amount, from.toUpperCase(), to.toUpperCase());
+
         return restTemplate.getForObject(url, Map.class);
     }
 }
