@@ -1,4 +1,4 @@
-package com.burak.currencyconverter;
+package com.burak.currency_converter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

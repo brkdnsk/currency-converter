@@ -122,4 +122,4 @@ function App() {
   );
 }
 
-AltExport default App;
+export default App;
