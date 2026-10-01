@@ -1,122 +1,125 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [amount, setAmount] = useState(1);
+  const [fromCurrency, setFromCurrency] = useState('USD');
+  const [toCurrency, setToCurrency] = useState('TRY');
+  const [currencies, setCurrencies] = useState([]);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // 1. Desteklenen para birimi listesini almak için ilk açılışta backend'e istek atıyoruz
+  useEffect(() => {
+    fetch('http://localhost:8080/api/currency/latest?base=USD')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.rates) {
+          // USD ve gelen diğer tüm kur anahtarlarını listeye ekliyoruz
+          setCurrencies(['USD', ...Object.keys(data.rates)]);
+        }
+      })
+      .catch((err) => console.error("Kurlar yüklenirken hata oluştu:", err));
+  }, []);
+
+  // 2. Dönüştürme işlemini yapan fonksiyon
+  const handleConvert = (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    fetch(`http://localhost:8080/api/currency/convert?from=${fromCurrency}&to=${toCurrency}&amount=${amount}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setResult(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Çeviri sırasında hata oluştu:", err);
+        setLoading(false);
+      });
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-4">
+      <div className="bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-700">
+        
+        {/* Başlık */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+            Döviz Çevirici
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">Spring Boot & React Portfolyo Projesi</p>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
 
-      <div className="ticks"></div>
+        {/* Form Alanı */}
+        <form onSubmit={handleConvert} className="space-y-6">
+          
+          {/* Miktar Girişi */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Miktar</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+              placeholder="Miktar giriniz..."
+              required
+            />
+          </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          {/* Para Birimleri Seçimi (Grid Yapısı) */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Kimden (From) */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Kaynak</label>
+              <select
+                value={fromCurrency}
+                onChange={(e) => setFromCurrency(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+              >
+                {currencies.map((curr) => (
+                  <option key={curr} value={curr}>{curr}</option>
+                ))}
+              </select>
+            </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+            {/* Kime (To) */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Hedef</label>
+              <select
+                value={toCurrency}
+                onChange={(e) => setToCurrency(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+              >
+                {currencies.map((curr) => (
+                  <option key={curr} value={curr}>{curr}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Çevir Butonu */}
+          <button
+            type="submit"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold py-3 rounded-lg transition-colors shadow-lg shadow-emerald-500/20"
+          >
+            {loading ? "Hesaplanıyor..." : "Çevir"}
+          </button>
+        </form>
+
+        {/* Sonuç Alanı */}
+        {result && result.rates && (
+          <div className="mt-8 p-4 bg-slate-900/50 border border-slate-700/50 rounded-xl text-center">
+            <p className="text-slate-400 text-sm">Sonuç</p>
+            <div className="text-2xl font-bold text-emerald-400 mt-1">
+              {amount} {fromCurrency} = {result.rates[toCurrency]} {toCurrency}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Güncelleme Tarihi: {result.date}</p>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
 }
 
-export default App
+AltExport default App;
